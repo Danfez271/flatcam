@@ -267,6 +267,9 @@ class App(QtCore.QObject):
     # a reusable signal to replot a list of objects
     # should be disconnected after use, so it can be reused
     replot_signal = pyqtSignal(list)
+    # signal for safe batch replotting from worker threads
+    batch_replot_signal = pyqtSignal(list, bool, str)
+    # args: (obj_list, fit_view, cncjob_plot_kind)
     # signal emitted when jumping
     jump_signal = pyqtSignal(tuple)
     # signal emitted when jumping
@@ -1304,6 +1307,9 @@ class App(QtCore.QObject):
 
         # signal to process the body of a script
         self.run_script.connect(self.script_processing)     # noqa
+
+        # signal for safe batch replotting from worker threads
+        self.batch_replot_signal.connect(self.on_batch_replot)
         # ################################# FINISHED CONNECTING SIGNALS #############################################
         # ###########################################################################################################
         # ###########################################################################################################
@@ -4471,6 +4477,20 @@ class App(QtCore.QObject):
 
                 self.inform.emit('[WARNING_NOTCL] %s' % _("Cancelled."))
 
+    def on_batch_replot(self, obj_list, fit_view, cncjob_plot_kind):
+        """Replot objects on the GUI thread. Called via signal from worker threads."""
+        for obj in obj_list:
+            try:
+                if isinstance(obj, CNCJobObject) and cncjob_plot_kind:
+                    obj.plot(kind=cncjob_plot_kind)
+                else:
+                    obj.plot()
+            except (RuntimeError, AttributeError) as e:
+                self.log.debug("on_batch_replot: plot() failed for %s -> %s" %
+                               (obj.obj_options.get('name', '?'), str(e)))
+        if fit_view:
+            self.plotcanvas.fit_view()
+
     def on_move2origin(self, use_thread=True):
         """
         Move selected objects to origin.
@@ -4518,13 +4538,7 @@ class App(QtCore.QObject):
                         # RuntimeError: UI widget was deleted (worker thread safety)
                         pass
 
-                for obj in obj_list:
-                    try:
-                        obj.plot()
-                    except (RuntimeError, AttributeError) as e:
-                        self.log.debug("on_move2origin: plot() failed for %s -> %s" %
-                                       (obj.obj_options.get('name', '?'), str(e)))
-                self.plotcanvas.fit_view()
+                self.batch_replot_signal.emit(obj_list, True, "")
 
                 for obj in obj_list:
                     out_name = obj.obj_options["name"]
@@ -7482,16 +7496,15 @@ class App(QtCore.QObject):
                 obj.obj_options.set_change_callback(obj.on_options_change)
         self.collection.update_view()
 
-        def worker_task(objs):
-            with self.proc_container.new(_("Enabling plots ...")):
-                for plot_obj in objs:
-                    # obj.obj_options['plot'] = True
-                    if isinstance(plot_obj, CNCJobObject):
-                        plot_obj.plot(visible=True, kind=self.options["cncjob_plot_kind"])
-                    else:
-                        plot_obj.plot(visible=True)
-
-        self.worker_task.emit({'fcn': worker_task, 'params': [objects]})
+        for obj in objects:
+            try:
+                if isinstance(obj, CNCJobObject):
+                    obj.plot(visible=True, kind=self.options["cncjob_plot_kind"])
+                else:
+                    obj.plot(visible=True)
+            except (RuntimeError, AttributeError) as e:
+                self.log.debug("enable_plots: plot() failed for %s -> %s" %
+                               (obj.obj_options.get('name', '?'), str(e)))
 
     def disable_plots(self, objects):
         """
@@ -7535,16 +7548,15 @@ class App(QtCore.QObject):
 
         self.collection.update_view()
 
-        def worker_task(objs):
-            with self.proc_container.new(_("Disabling plots ...")):
-                for plot_obj in objs:
-                    # obj.obj_options['plot'] = True
-                    if isinstance(plot_obj, CNCJobObject):
-                        plot_obj.plot(visible=False, kind=self.options["cncjob_plot_kind"])
-                    else:
-                        plot_obj.plot(visible=False)
-
-        self.worker_task.emit({'fcn': worker_task, 'params': [objects]})
+        for obj in objects:
+            try:
+                if isinstance(obj, CNCJobObject):
+                    obj.plot(visible=False, kind=self.options["cncjob_plot_kind"])
+                else:
+                    obj.plot(visible=False)
+            except (RuntimeError, AttributeError) as e:
+                self.log.debug("disable_plots: plot() failed for %s -> %s" %
+                               (obj.obj_options.get('name', '?'), str(e)))
 
     def toggle_plots(self, objects):
         """
