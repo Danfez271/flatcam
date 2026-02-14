@@ -205,7 +205,10 @@ class ToolMove(AppTool):
                     for sel_obj in obj_list:
                         # if the Gerber mark shapes are enabled they need to be disabled before move
                         if sel_obj.kind == 'gerber':
-                            sel_obj.ui.aperture_table_visibility_cb.setChecked(False)
+                            try:
+                                sel_obj.ui.aperture_table_visibility_cb.setChecked(False)
+                            except (RuntimeError, AttributeError):
+                                pass
 
                         try:
                             sel_obj.replotApertures.emit()
@@ -238,7 +241,7 @@ class ToolMove(AppTool):
                             sel_obj.source_file = self.app.f_handlers.export_excellon(
                                 obj_name=out_name, filename=None, local_use=sel_obj, use_thread=False)
                 except Exception as err:
-                    app_obj.log.error('[ERROR_NOTCL] %s --> %s' % ('ToolMove.move_handler()', str(err)))
+                    log.error('[ERROR_NOTCL] %s --> %s' % ('ToolMove.move_handler()', str(err)))
                     return "fail"
 
                 # time to plot the moved objects
