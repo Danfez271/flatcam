@@ -950,11 +950,7 @@ class GerberObject(FlatCAMObj, Gerber):
             visible = kwargs['visible']
 
         # if the Follow Geometry checkbox is checked then plot only the follow geometry
-        try:
-            follow_plot = self.ui.follow_cb.get_value()
-        except (RuntimeError, AttributeError):
-            # UI widget may have been deleted (e.g. called from worker thread after tab closed)
-            follow_plot = False
+        follow_plot = self.obj_options.get("follow", False)
 
         if follow_plot:
             geometry = self.follow_geometry

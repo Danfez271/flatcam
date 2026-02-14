@@ -1281,10 +1281,7 @@ class ExcellonObject(FlatCAMObj, Excellon):
 
     def plot(self, visible=None, kind=None):
 
-        try:
-            multicolored = self.ui.multicolored_cb.get_value()
-        except (RuntimeError, AttributeError):
-            multicolored = False
+        multicolored = self.obj_options.get("multicolored", False)
 
         # Does all the required setup and returns False
         # if the 'ptint' option is set to False.
@@ -1319,17 +1316,11 @@ class ExcellonObject(FlatCAMObj, Excellon):
             self.solid_geometry = [self.solid_geometry]
 
         if not visible:
-            try:
-                visible = self.ui.plot_cb.get_value()
-            except (RuntimeError, AttributeError):
-                visible = True
+            visible = self.obj_options.get("plot", True)
 
         try:
             # Plot Excellon (All polygons?)
-            try:
-                solid_plot = self.ui.solid_cb.get_value()
-            except (RuntimeError, AttributeError):
-                solid_plot = True
+            solid_plot = self.obj_options.get("solid", False)
 
             if solid_plot:
                 # plot polygons for each tool separately

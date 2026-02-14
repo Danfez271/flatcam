@@ -1379,7 +1379,7 @@ class CNCJobObject(FlatCAMObj, CNCjob):
         # Annotations shapes plotting
         try:
             if self.app.use_3d_engine:
-                if self.ui.annotation_cb.get_value() and visible:
+                if self.app.options.get("cncjob_annotation", True) and visible:
                     self.plot_annotations(obj=self, visible=True)
                 else:
                     self.plot_annotations(obj=self, visible=False)
