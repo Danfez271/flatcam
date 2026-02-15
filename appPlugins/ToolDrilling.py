@@ -1212,6 +1212,11 @@ class ToolDrilling(Excellon, AppTool):
             self.app.inform.emit('[ERROR] %s' % _("Failed to parse Tools DB file."))
             return
 
+        # Backfill missing keys in loaded DB tools
+        from defaults import AppDefaults
+        for _tid, _tval in self.tools_db_dict.items():
+            AppDefaults.backfill_tool_db_entry(_tval.get('data', {}), log=self.app.log)
+
         if not self.tools_db_dict:
             self.app.inform.emit('[ERROR_NOTCL] %s' % _("Tools DB empty."))
             return

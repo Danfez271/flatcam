@@ -485,6 +485,11 @@ class CutOut(AppTool):
             self.on_tool_default_add(dia=tool_dia)
             return
 
+        # Backfill missing keys in loaded DB tools
+        from defaults import AppDefaults
+        for _tid, _tval in tools_db_dict.items():
+            AppDefaults.backfill_tool_db_entry(_tval.get('data', {}), log=self.app.log)
+
         tool_found = 0
 
         # look in database tools

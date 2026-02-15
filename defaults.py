@@ -863,6 +863,51 @@ class AppDefaults:
         ]
     }
 
+    # Keys in factory_defaults that should NOT be stored in the tool DB.
+    # These are UI-structural (tooldia lists, tool ordering, preprocessor lists, cursor prefs).
+    DB_EXCLUDED_KEYS = {
+        "tools_drill_tool_order",
+        "tools_drill_preprocessor_list",
+        "tools_mill_tooldia",
+        "tools_mill_preprocessor_list",
+        "tools_iso_tooldia",
+        "tools_iso_order",
+        "tools_ncc_tools",
+        "tools_ncc_order",
+        "tools_paint_tooldia",
+        "tools_paint_order",
+        "tools_cutout_tooldia",
+        "tools_cutout_big_cursor",
+    }
+
+    # All tool namespace prefixes
+    TOOL_DB_PREFIXES = (
+        "tools_drill_", "tools_mill_", "tools_iso_",
+        "tools_ncc_", "tools_paint_", "tools_cutout_",
+    )
+
+    @classmethod
+    def get_all_db_tool_keys(cls):
+        """Return {key: default_value} for all factory_defaults keys that belong in a tool DB entry."""
+        return {
+            k: v for k, v in cls.factory_defaults.items()
+            if any(k.startswith(p) for p in cls.TOOL_DB_PREFIXES) and k not in cls.DB_EXCLUDED_KEYS
+        }
+
+    @staticmethod
+    def backfill_tool_db_entry(data_dict, log=None):
+        """Backfill missing canonical keys into a single tool's data dict.
+        Returns list of keys that were added."""
+        canonical = AppDefaults.get_all_db_tool_keys()
+        missing = []
+        for key, default_val in canonical.items():
+            if key not in data_dict:
+                data_dict[key] = default_val
+                missing.append(key)
+        if missing and log:
+            log.warning("Backfilled %d missing DB keys: %s" % (len(missing), ', '.join(missing)))
+        return missing
+
     @classmethod
     def save_factory_defaults(cls, file_path: str, version: (float, str)):
         """Writes the factory defaults to a file at the given path, overwriting any existing file."""
