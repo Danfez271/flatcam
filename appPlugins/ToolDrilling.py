@@ -671,6 +671,9 @@ class ToolDrilling(Excellon, AppTool):
             new_uid += 1
 
         self.excellon_tools = new_tools
+        # sync to source object so build_tool_ui() won't overwrite with stale data
+        if self.excellon_obj:
+            self.excellon_obj.tools = deepcopy(new_tools)
 
         # the tools table changed therefore we need to rebuild it
         QtCore.QTimer.singleShot(20, self.build_tool_ui)
@@ -1283,6 +1286,10 @@ class ToolDrilling(Excellon, AppTool):
                 else:
                     self.excellon_tools[tool_id]['data'][d] = tool_from_db['data'][d]
 
+            # also update the source object so build_tool_ui() won't overwrite with stale data
+            if self.excellon_obj and tool_id in self.excellon_obj.tools:
+                self.excellon_obj.tools[tool_id]['data'].update(self.excellon_tools[tool_id]['data'])
+
         for idx in range(self.app.ui.plot_tab_area.count()):
             if self.app.ui.plot_tab_area.tabText(idx) == _("Tools Database"):
                 wdg = self.app.ui.plot_tab_area.widget(idx)
@@ -1348,6 +1355,8 @@ class ToolDrilling(Excellon, AppTool):
                     return
 
             self.excellon_tools = new_tools_dict
+            # sync to source object so build_tool_ui() won't overwrite with stale data
+            self.excellon_obj.tools = deepcopy(new_tools_dict)
             self.build_tool_ui()
 
     def on_toggle_all_rows(self):

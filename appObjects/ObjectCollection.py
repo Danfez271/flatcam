@@ -663,8 +663,10 @@ class ObjectCollection(QtCore.QAbstractItemModel):
 
         # decide if to show or hide the Notebook side of the screen
         if self.app.options["global_project_autohide"] is True:
-            # always open the notebook on object added to collection
-            self.app.ui.splitter.setSizes([1, 1])
+            # only open the notebook if it is currently collapsed; preserve user-set proportions otherwise
+            sizes = self.app.ui.splitter.sizes()
+            if sizes[0] == 0:
+                self.app.ui.splitter.setSizes([1, 1])
 
     def get_names(self):
         """
