@@ -196,7 +196,8 @@ class AppGeoEditor(QtCore.QObject):
 
         self.app.ui.grid_snap_btn.triggered.connect(lambda: self.on_grid_toggled())
         self.app.ui.corner_snap_btn.setCheckable(True)
-        self.app.ui.corner_snap_btn.triggered.connect(lambda: self.toolbar_tool_toggle("corner_snap"))
+        self.app.ui.corner_snap_btn.triggered.connect(
+            lambda: self.toolbar_tool_toggle("corner_snap", widget=self.app.ui.corner_snap_btn))
 
         self.app.pool_recreated.connect(self.pool_recreated)
 
@@ -1060,14 +1061,15 @@ class AppGeoEditor(QtCore.QObject):
         self.tool_shape.clear(update=True)
         self.tool_shape.redraw()
 
-    def toolbar_tool_toggle(self, key):
+    def toolbar_tool_toggle(self, key, widget=None):
         """
         It is used as a slot by the Snap buttons.
 
         :param key:     Key in the self.editor_options dictionary that is to be updated
+        :param widget:  Optional QAction widget to use directly; falls back to self.sender() if None
         :return:        Boolean. Status of the checkbox that toggled the Editor Tool
         """
-        cb_widget = self.sender()
+        cb_widget = widget if widget is not None else self.sender()
         assert isinstance(cb_widget, QtGui.QAction), "Expected a QAction got %s" % type(cb_widget)
         self.editor_options[key] = cb_widget.isChecked()
 
@@ -1123,7 +1125,7 @@ class AppGeoEditor(QtCore.QObject):
         return
 
     def on_grid_toggled(self):
-        self.toolbar_tool_toggle("grid_snap")
+        self.toolbar_tool_toggle("grid_snap", widget=self.app.ui.grid_snap_btn)
 
         # make sure that the cursor shape is enabled/disabled, too
         if self.editor_options['grid_snap'] is True:
