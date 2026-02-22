@@ -104,7 +104,7 @@ Full Python dependency list is in `requirements.txt`.
 Install via the Homebrew tap:
 
 ```bash
-brew tap KP-Krisnop/flatcam-evo
+brew tap kpkrisnop/flatcam-evo
 brew install flatcam-evo
 ```
 
@@ -129,8 +129,8 @@ brew install python@3.11 pyqt gdal geos freetype spatialindex qpdf pkg-config
 **2. Clone the repository:**
 
 ```bash
-git clone https://github.com/KP-Krisnop/flatcam-evo.git
-cd flatcam-evo
+git clone https://github.com/kpkrisnop/flatcam.git
+cd flatcam
 ```
 
 **3. Create and activate a conda environment:**
@@ -170,8 +170,8 @@ sudo apt-get install python3.11 python3.11-pip python3.11-venv python3-tk \
 **2. Clone the repository:**
 
 ```bash
-git clone https://github.com/KP-Krisnop/flatcam-evo.git
-cd flatcam-evo
+git clone https://github.com/kpkrisnop/flatcam.git
+cd flatcam
 ```
 
 **3. Create a virtual environment and install dependencies:**
@@ -224,8 +224,8 @@ matching your Python version.
 **3. Clone the repository:**
 
 ```cmd
-git clone https://github.com/KP-Krisnop/flatcam-evo.git
-cd flatcam-evo
+git clone https://github.com/kpkrisnop/flatcam.git
+cd flatcam
 ```
 
 **4. Create a virtual environment and install dependencies:**
@@ -260,8 +260,8 @@ User data will then be stored in the `config\` folder next to the application.
 If you have [Mamba](https://conda-forge.org/download/) or Conda installed:
 
 ```bash
-git clone https://github.com/KP-Krisnop/flatcam-evo.git
-cd flatcam-evo
+git clone https://github.com/kpkrisnop/flatcam.git
+cd flatcam
 mamba env create -f environment.yml
 mamba activate flatcam
 python flatcam.py
