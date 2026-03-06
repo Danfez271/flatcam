@@ -2009,6 +2009,7 @@ class MainGUI(QtWidgets.QMainWindow):
         self.app_icon.addFile(self.app.resource_location + '/app128.png', QtCore.QSize(128, 128))
         self.app_icon.addFile(self.app.resource_location + '/app256.png', QtCore.QSize(256, 256))
         self.setWindowIcon(self.app_icon)
+        QtWidgets.QApplication.instance().setWindowIcon(self.app_icon)
 
         self.setWindowTitle('FlatCAM Evo %s %s - %s' %
                             (self.app.version,
